@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+    <link rel="stylesheet" href="{% static 'dvdrental_prediction/css/mystyle.css' %}">
+</head>
+<body>
+    <h1>Search Results</h1>
+
+    <ul>
+        {% for movie in movies %}
+            <li>{{ movie.title }} ({{ movie.release_year }})</li>
+        {% empty %}
+            <li>No movies found.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'movie_list' %}">Back to Movie List</a>
+</body>
+</html>

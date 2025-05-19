@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Home</title>
+
+        <link rel='stylesheet' href="{% static 'dvdrental_prediction/css/mystyle.css' %}">
+    </head>
+    <body>
+        <h1>Welcome to the DVD Rental Prediction Home Page</h1>
+        <img src="{% static 'dvdrental_prediction/images/logo.png' %}" alt="DVD Rental" width="300">
+        <p id='generated-text'>Loading text...</p>
+        <a href="{% url 'about' %}">Go to About</a>
+        <script src="{% static 'dvdrental_prediction/js/myscript.js'%}"></script>
+        <br><a href="{% url 'movie_list' %}">Go to Movie_List</a></br>
+    </body>
+    </html>

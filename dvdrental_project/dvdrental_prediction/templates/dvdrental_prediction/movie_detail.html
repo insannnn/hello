@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Movie List</title>
+        <link rel="stylesheet" href="{% static 'dvdrental_prediction/css/mystyle.css'%}">
+    </head>
+    <body>
+        <h2>{{ movie.title }} ({{ movie.release_year }})</h2>
+        <p>Rating : {{ movie.rating }} </p>
+        <p>Language : {{ movie.language.name }}</p>
+
+        <h3>Actors:</h3>
+        <ul>
+            {% for actor in actors %}
+                <li>{{ actor.first_name }} {{ actor.last_name }}</li>
+            {% endfor %}
+        </ul>
+
+        <a href='{% url "movie_list" %}'>Back to list</a>
+    </body>
+</html>

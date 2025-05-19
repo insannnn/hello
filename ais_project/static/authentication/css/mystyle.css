@@ -1,0 +1,24 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-img {
+    width: 50px;
+    border-radius: 100%;
+    border: 1px solid #eee;
+}
+
+.sidebar{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 80px;
+    width: 80px;
+    background-color: #12171e;
+    padding: 0.4rem 0.8rem;
+    transition: all 0.5s ease;
+}
+

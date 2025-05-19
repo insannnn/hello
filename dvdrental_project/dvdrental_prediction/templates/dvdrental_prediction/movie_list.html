@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie List</title>
+    <link rel="stylesheet" href="{% static 'dvdrental_prediction/css/mystyle.css' %}">
+</head>
+<body>
+    <h1 style="color:green">Movie List</h1>
+    <a href="{% url 'home' %}">Go back to home</a><br><br>
+
+    <!-- SEARCH FORM -->
+    <div class="search-form-container">
+        <form method="get" action="{% url 'search_result' %}">
+          <label for="id_actor">Actor:</label>
+          {{ form.actor }}
+      
+          <label for="id_category">Category:</label>
+          {{ form.category }}
+      
+          <label for="id_language">Language:</label>
+          {{ form.language }}
+      
+          <button type="submit">Search</button>
+        </form>
+      </div>
+
+    <!-- MOVIE TABLE -->
+    <table border='1'>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Release Year</th>
+            <th>Category</th>
+            <th>Detail</th>
+        </tr>
+        {% for movie in movies %}
+        <tr>
+            <td>{{ movie.film_id }}</td>
+            <td>{{ movie.title }}</td>
+            <td>{{ movie.release_year }}</td>
+            <td>
+                {% for category in movie.categories.all %}
+                    {{ category.name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td><a href="{% url 'movie_detail' film_id=movie.film_id %}">Details</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
