@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'academic_analytics/css/style.css' %}">
+</head>
+<body>
+    <div class="container-fluid position-relative bg-white min-vh-100 d-flex align-items-center">
+        <!-- Decorative blob shape -->
+        <div class="position-absolute top-0 end-0 w-50 h-100 bg-light-blue rounded-start blob-shape d-none d-md-block"></div>
+
+        <div class="container z-2">
+            <div class="row align-items-center">
+                <!-- Left Text Section -->
+                <div class="col-md-6 text-center text-md-start py-5">
+                    <h1 class="display-5 fw-bold text-dark">
+                        Academic <span class="text-primary">Analytics</span><br>Platform
+                    </h1>
+                    <p class="lead text-secondary mb-4">
+                        paltform academic analyzes to ensure every student achieves academically.
+                    </p>
+                    <div>
+                        <a href="/signin" class="btn btn-primary btn-lg me-3 px-4">Sign In</a>
+                        <a href="/signup" class="btn btn-outline-primary btn-lg px-4">Sign Up</a>
+                    </div>
+                </div>
+
+                <!-- Right Image Section -->
+                <div class="col-md-6 text-center d-none d-md-block">
+                    <img src="https://i.ibb.co/TKfQmWj/student.png" alt="Student" class="img-fluid" style="max-height: 450px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional for responsiveness) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

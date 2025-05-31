@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Academic Analytics</title>
+    <link rel="stylesheet" href="{% static 'academic_analytics/css/style.css' %}">
+    <!-- Bootstrap for better styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Admin Panel - Lecture Recommendation</h1>
+        
+        <nav class="nav mb-4">
+            <a class="nav-link" href="{% url 'home' %}">Home</a>
+            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            <a class="nav-link active" href="{% url 'admin_panel' %}">Admin Panel</a>
+            <a class="nav-link" href="{% url 'about' %}">Prediction</a>
+        </nav>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lecture Recommendation</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="{{ form.student.id_for_label }}" class="form-label">Student</label>
+                                {{ form.student }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.course.id_for_label }}" class="form-label">Course</label>
+                                {{ form.course }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.attendance.id_for_label }}" class="form-label">Attendance (%)</label>
+                                {{ form.attendance }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.midterm_score.id_for_label }}" class="form-label">Midterm Score</label>
+                                {{ form.midterm_score }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.project_score.id_for_label }}" class="form-label">Project Score</label>
+                                {{ form.project_score }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Predict Grade</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                {% if prediction_result %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Prediction Result</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-success">
+                            <h4>Predicted Grade: {{ prediction_result.predicted_grade }}</h4>
+                            <p>Confidence: {{ prediction_result.confidence }}%</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'academic_analytics/js/script.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #4CAF50;
+}
+
+img {
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+
+.bg-light-blue {
+    background-color: #e6f0ff;
+}
+
+.blob-shape {
+    clip-path: ellipse(70% 50% at 90% 40%);
+    z-index: 1;
+}
+
+.card {
+    background-color: #ffffff;
+}
+
+input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+}
+
+.card {
+    background-color: #ffffff;
+}
+
+input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+}

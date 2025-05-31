@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'academic_analytics/css/style.css' %}" />
+</head>
+<body style="font-family: 'Poppins', sans-serif; background-color: #f8f9fa;">
+
+    <!-- Header Text -->
+    <div class="text-center my-5">
+    <p class="text-uppercase text-primary fw-semibold mb-2">About</p>
+    <h1 class="fw-bold text-primary">The dream team of<br />Tukang Ramals</h1>
+</div>
+
+    <!-- Cards -->
+    <div class="container pb-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+
+            <!-- Card 1 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="https://i.ibb.co/bW4YQwT/team1.jpg" class="card-img-top" alt="Team Member 1">
+                    <div class="card-body">
+                        <h6 class="text-muted">01</h6>
+                        <h5 class="card-title fw-semibold">Custom SEO Services</h5>
+                        <p class="card-text text-secondary small">
+                            Clean, organic SEO tactics that include technical audits, on-page & link building.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="https://i.ibb.co/DgVWqms/team2.jpg" class="card-img-top" alt="Team Member 2">
+                    <div class="card-body">
+                        <h6 class="text-muted">02</h6>
+                        <h5 class="card-title fw-semibold">SEO Website Design</h5>
+                        <p class="card-text text-secondary small">
+                            We design highly effective SEO-centered sites on any budget including Webflow, WP, HTML.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="https://i.ibb.co/6gFM3GH/team3.jpg" class="card-img-top" alt="Team Member 3">
+                    <div class="card-body">
+                        <h6 class="text-muted">03</h6>
+                        <h5 class="card-title fw-semibold">SEO Consulting</h5>
+                        <p class="card-text text-secondary small">
+                            Get 1:1 SEO support or team training to scale your in-house SEO strategies.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="https://i.ibb.co/rM1c0wz/team4.jpg" class="card-img-top" alt="Team Member 4">
+                    <div class="card-body">
+                        <h6 class="text-muted">04</h6>
+                        <h5 class="card-title fw-semibold">Content Strategy</h5>
+                        <p class="card-text text-secondary small">
+                            Our team creates targeted content that drives traffic and converts readers into customers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Back to Home Button -->
+    <div class="text-center mt-4 pb-5">
+        <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill px-4 py-2">Back to Home</a>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

@@ -37,7 +37,7 @@ def signin(request):
         if user is not None:
             login(request, user)
             fname = user.first_name
-            return render(request, 'authentication/dashboard.html', {'fname': fname})
+            return render(request, 'authentication/i.html', {'fname': fname})
         else:
             messages.error(request, "Invalid username or password.")
             return render(request, 'authentication/signin.html')
@@ -48,6 +48,3 @@ def signout(request):
     logout (request)
     messages.success(request, 'Logged out succesfully!')
     return redirect('home')
-
-def dashboard(request):
-    return render(request, 'authentication/dashboard.html')
