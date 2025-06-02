@@ -198,7 +198,7 @@ def admin_panel(request):
                 course_id = course.course_id
 
                 # Buat koneksi ke database
-                engine = create_engine('postgresql://postgres:12345678@localhost:5432/final')
+                engine = create_engine('postgresql://postgres:12345678@localhost:5051/final')
 
                 # 🔍 Cek apakah course sudah pernah diambil
                 taken_query = f"""
@@ -286,7 +286,7 @@ def admin_panel(request):
                 student = form.cleaned_data['student']
 
                 # Buat koneksi ke database
-                engine = create_engine('postgresql://postgres:12345678@localhost:5432/final')
+                engine = create_engine('postgresql://postgres:12345678@localhost:5051/final')
 
                 # 🔍 Cek apakah mahasiswa sudah pernah mengambil course ini
                 taken_query = f"""
@@ -355,7 +355,7 @@ def admin_panel(request):
                 score_a = form.cleaned_data['score_a']
                 score_b = form.cleaned_data['score_b']
 
-                engine = create_engine('postgresql://postgres:12345678@localhost:5432/final')
+                engine = create_engine('postgresql://postgres:12345678@localhost:5051/final')
                 recommendation_result = prepare_course_recommendation(course_a, course_b, score_a, score_b, engine)
 
                 prediction_results['course_recommendation'] = recommendation_result
@@ -372,7 +372,7 @@ def admin_panel(request):
                 with open(model_path, 'rb') as file:
                     model_data = pickle.load(file)
 
-                engine = create_engine('postgresql://postgres:12345678@localhost:5432/final')
+                engine = create_engine('postgresql://postgres:12345678@localhost:5051/final')
                 input_data = prepare_dropout_risk_data(stu_id, engine)
 
                 # Prediksi klaster
@@ -699,7 +699,7 @@ def course_recommendation(request):
             score_b = form.cleaned_data['score_b']
             
             # Create database connection
-            engine = create_engine('postgresql://postgres:12345678@localhost:5432/final')
+            engine = create_engine('postgresql://postgres:12345678@localhost:5051/final')
             
             # Get recommendation results
             recommendation_result = prepare_course_recommendation(
@@ -949,7 +949,7 @@ from sklearn.decomposition import PCA
 from sqlalchemy import create_engine
 
 # DB connection (adjust as needed)
-engine = create_engine('postgresql://postgres:12345678@localhost:5432/final')
+engine = create_engine('postgresql://postgres:12345678@localhost:5051/final')
 
 def prepare_dropout_risk_data(stu_id, engine):
     avg_grade_query = f"""SELECT AVG(grade) AS avg_grade FROM enrollment WHERE stu_id = {stu_id}"""
