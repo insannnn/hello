@@ -1,0 +1,635 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Academic Analytics</title>
+    <link rel="stylesheet" href="{% static 'academic_analytics/css/style.css' %}">
+    <!-- Bootstrap for better styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Admin Panel - Academic Predictions</h1>
+        <nav class="nav mb-4">
+            <a class="nav-link" href="{% url 'home' %}">Home</a>
+            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+            <a class="nav-link active" href="{% url 'admin_panel' %}">Admin Panel</a>
+        </nav>
+        
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Nav tabs for different prediction types -->
+        <ul class="nav nav-tabs mb-4" id="predictionTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="prediction_tab" data-bs-toggle="tab" data-bs-target="#prediction" type="button" role="tab" aria-controls="prediction" aria-selected="true">
+                    <i class="bi bi-lightbulb"></i> Course prediction
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="instructor-tab" data-bs-toggle="tab" data-bs-target="#instructor" type="button" role="tab" aria-controls="instructor" aria-selected="false">
+                    <i class="bi bi-person-check"></i> Instructor Recommendation
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="recommendation-tab" data-bs-toggle="tab" data-bs-target="#recommendation" type="button" role="tab" aria-controls="recommendation" aria-selected="false">
+                    <i class="bi bi-person-check"></i> Course Recommendation
+                </button>
+            </li>
+            
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="dropout-tab" data-bs-toggle="tab" data-bs-target="#dropout" type="button" role="tab" aria-controls="dropout" aria-selected="false">
+                    <i class="bi bi-activity"></i> Dropout Risk
+                </button>
+            </li>
+        </ul>
+        
+        <!-- Tab content -->
+        <div class="tab-content" id="predictionsTabContent">
+            <!-- Course Prediction Tab -->
+            <div class="tab-pane fade show active" id="prediction" role="tabpanel" aria-labelledby="prediction_tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h3>Course Prediction</h3>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="form_type" value="recommendation">
+                                    <div class="mb-3">
+                                        <label for="{{ forms.recommendation_form.student.id_for_label }}" class="form-label">Student</label>
+                                        {{ forms.recommendation_form.student }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="{{ forms.recommendation_form.course.id_for_label }}" class="form-label">Course</label>
+                                        {{ forms.recommendation_form.course }}
+                                    </div>
+                                    <button type="submit" class="btn btn-dark">Check Recommendation</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        {% if prediction_results.recommendation %}
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h3>Recommendation Result</h3>
+                                </div>
+                                <div class="card-body">
+                                    {% if prediction_results.recommendation.warning %}
+                                        <div class="alert alert-warning">
+                                            {{ prediction_results.recommendation.warning }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="alert {% if prediction_results.recommendation.recommended == '✅ Recommended' %}alert-success{% else %}alert-danger{% endif %}">
+                                        <h4>{{ prediction_results.recommendation.recommended }}</h4>
+                                        <p>Course ID: {{ prediction_results.recommendation.course_id }}</p>
+                                        <p>Difficulty: {{ prediction_results.recommendation.difficulty }}</p>
+                                        <p>Course Pass Rate: {{ prediction_results.recommendation.pass_rate }}%</p>
+                                        <p>Predicted Success Probability: {{ prediction_results.recommendation.probability }}%</p>
+                                    </div>
+
+                                    <!-- Chart Container -->
+                                    <div class="mt-4">
+                                        <h5>Course Pass Rate</h5>
+                                        <canvas id="passRateChart" width="200" height="200"></canvas>
+
+                                        <h5 class="mt-4">Predicted Success Probability</h5>
+                                        <canvas id="probabilityChart" width="200" height="200"></canvas>
+                                    </div>
+                                </div>
+                                {% if prediction_results.recommendation.top_by_difficulty %}
+                                <div class="card mt-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h4>🏆 Top Recommended Courses by Difficulty</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>The following are the courses with the highest predicted success rate for each difficulty level</p>
+                                        <div class="row">
+                                            {% for level, course in prediction_results.recommendation.top_by_difficulty.items %}
+                                                <div class="col-md-4">
+                                                    <div class="card border-success mb-3">
+                                                        <div class="card-header bg-light">
+                                                            <strong>{{ level }}</strong>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">{{ course.course_name }}</h5>
+                                                            <p class="card-text">Predicted Success: <strong>{{ course.probability }}%</strong></p>
+                                                            <p class="card-text text-muted">Course ID: {{ course.course_id }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            </div>
+
+                            <!-- Chart.js CDN -->
+                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                            <script>
+                                // Course Pass Rate Pie Chart
+                                const passRate = {{ prediction_results.recommendation.pass_rate }};
+                                const passRateChart = new Chart(document.getElementById('passRateChart'), {
+                                    type: 'pie',
+                                    data: {
+                                        labels: ['Pass', 'Fail'],
+                                        datasets: [{
+                                            data: [passRate, 100 - passRate],
+                                            backgroundColor: ['#28a745', '#dc3545']
+                                        }]
+                                    }
+                                });
+
+                                // Predicted Success Probability Pie Chart
+                                const successProbability = {{ prediction_results.recommendation.probability }};
+                                const probabilityChart = new Chart(document.getElementById('probabilityChart'), {
+                                    type: 'pie',
+                                    data: {
+                                        labels: ['Success', 'Failure'],
+                                        datasets: [{
+                                            data: [successProbability, 100 - successProbability],
+                                            backgroundColor: ['#007bff', '#ffc107']
+                                        }]
+                                    }
+                                });
+                            </script>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Course Recommendation Tab -->
+            <div class="tab-pane fade" id="recommendation" role="tabpanel" aria-labelledby="recommendation-tab">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h3>Course Recommendation</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="course_recommendation">
+                            <div class="mb-3">
+                                <label for="{{ forms.course_recommendation_form.course_a.id_for_label }}" class="form-label">Course A</label>
+                                {{ forms.course_recommendation_form.course_a }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ forms.course_recommendation_form.score_a.id_for_label }}" class="form-label">Score A</label>
+                                {{ forms.course_recommendation_form.score_a }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ forms.course_recommendation_form.course_b.id_for_label }}" class="form-label">Course B</label>
+                                {{ forms.course_recommendation_form.course_b }}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ forms.course_recommendation_form.score_b.id_for_label }}" class="form-label">Score B</label>
+                                {{ forms.course_recommendation_form.score_b }}
+                            </div>
+
+                        <button type="submit" class="btn btn-dark">Get Recommendations</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            {% if prediction_results.course_recommendation %}
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h3>Recommended Courses</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Based on Course A: <strong>{{ prediction_results.course_recommendation.course_a.name }}</strong> (Score: {{ prediction_results.course_recommendation.course_a.score }})</p>
+                        <p>and Course B: <strong>{{ prediction_results.course_recommendation.course_b.name }}</strong> (Score: {{ prediction_results.course_recommendation.course_b.score }})</p>
+
+                        <!-- Chart Canvas -->
+                        <canvas id="predictedScoresChart" height="300" class="mb-4"></canvas>
+
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Recommended Course</th>
+                                    <th>Predicted Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rec in prediction_results.course_recommendation.recommendations %}
+                                    <tr>
+                                        <td>{{ rec.course_name }}</td>
+                                        <td>{{ rec.predicted_score }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <script>
+                    const ctx = document.getElementById('predictedScoresChart').getContext('2d');
+
+                    const data = {
+                        labels: [
+                            {% for rec in prediction_results.course_recommendation.recommendations %}
+                                "{{ rec.course_name }}"{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        ],
+                        datasets: [{
+                            label: 'Predicted Score',
+                            data: [
+                                {% for rec in prediction_results.course_recommendation.recommendations %}
+                                    {{ rec.predicted_score }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            ],
+                            backgroundColor: 'rgba(0, 123, 255, 0.7)',  // Bootstrap primary color transparent
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    };
+
+                    const options = {
+                        indexAxis: 'y',   // <-- This makes the bars horizontal
+                        responsive: true,
+                        scales: {
+                            x: {
+                                min: 0,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Predicted Score'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Recommended Course'
+                                }
+                            }
+                        }
+                    };
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: options
+                    });
+                </script>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+            
+            <!-- Instructor Recommendation Tab -->
+            <div class="tab-pane fade" id="instructor" role="tabpanel" aria-labelledby="instructor-tab">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h3>Find Instructor Recommendations</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="instructor">
+                        <div class="mb-3">
+                            <label for="{{ forms.instructor_form.student.id_for_label }}" class="form-label">Student</label>
+                            {{ forms.instructor_form.student }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ forms.instructor_form.course.id_for_label }}" class="form-label">Course</label>
+                            {{ forms.instructor_form.course }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ forms.instructor_form.target_grade.id_for_label }}" class="form-label">Target Grade</label>
+                            {{ forms.instructor_form.target_grade }}
+                        </div>
+                        <button type="submit" class="btn btn-dark">Get Recommendations</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+        {% if prediction_results.instructor %}
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h3>Instructor Recommendations</h3>
+                </div>
+                <div class="card-body">
+                    <h4>Top Instructors for {{ prediction_results.instructor.course_name }}</h4>
+                    <p>Target Grade: {{ prediction_results.instructor.target_grade }}</p>
+                    
+                    <!-- Chart showing instructor match scores and predicted grades -->
+                    <canvas id="instructorChart" height="300" class="mb-4"></canvas>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Instructor</th>
+                                    <th>Avg. Grade</th>
+                                    <th>Students</th>
+                                    <th>Match Score</th>
+                                    <th>Predicted Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for instructor in prediction_results.instructor.recommendations %}
+                                <tr>
+                                    <td>{{ instructor.instructor_name }}</td>
+                                    <td>{{ instructor.average_grade }}</td>
+                                    <td>{{ instructor.student_count }}</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                style="width: {{ instructor.match_score|floatformat:0 }}%" 
+                                                aria-valuenow="{{ instructor.match_score|floatformat:0 }}" 
+                                                aria-valuemin="0" aria-valuemax="100">
+                                                {{ instructor.match_score }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ instructor.predicted_score }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Updated chart script for displaying both match score and predicted score -->
+                    <script>
+                        const ctx = document.getElementById('instructorChart').getContext('2d');
+
+                        const data = {
+                            labels: [
+                                {% for instructor in prediction_results.instructor.recommendations %}
+                                    "{{ instructor.instructor_name }}"{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            ],
+                            datasets: [
+                                {
+                                    label: 'Average Grade',
+                                    data: [
+                                        {% for instructor in prediction_results.instructor.recommendations %}
+                                            {{ instructor.average_grade }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    ],
+                                    backgroundColor: 'rgba(40, 167, 69, 0.7)', // Bootstrap success color with transparency
+                                    borderColor: 'rgba(40, 167, 69, 1)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Predicted Score',
+                                    data: [
+                                        {% for instructor in prediction_results.instructor.recommendations %}
+                                            {{ instructor.predicted_score }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    ],
+                                    backgroundColor: 'rgba(0, 123, 255, 0.7)', // Bootstrap primary color with transparency
+                                    borderColor: 'rgba(0, 123, 255, 1)',
+                                    borderWidth: 1,
+                                    yAxisID: 'y1',
+                                    type: 'line',
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8
+                                }
+                            ]
+                        };
+
+                        const options = {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    min: 0,
+                                    max: 100,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Average Score'
+                                    },
+                                    grid: {
+                                        display: true
+                                    }
+                                },
+                                y1: {
+                                    min: {{ prediction_results.instructor.target_grade|default:70 }} - 10,
+                                    max: 100,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: 'Predicted Score'
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Instructor'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        title: function(tooltipItems) {
+                                            return tooltipItems[0].label;
+                                        },
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            label += context.raw;
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        };
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: data,
+                            options: options
+                        });
+                    </script>
+
+                    <div class="mt-3">
+                        <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#recommendationDetails" aria-expanded="false" 
+                            aria-controls="recommendationDetails">
+                            View Details
+                        </button>
+                        <div class="collapse mt-2" id="recommendationDetails">
+                            <div class="card card-body">
+                                <p><strong>How recommendations work:</strong></p>
+                                <ul>
+                                    <li>Recommendations are based on historical performance data</li>
+                                    <li>Match score shows how well the instructor meets your target grade</li>
+                                    <li>Predicted score estimates what an average student would achieve with this instructor</li>
+                                    <li>Higher match scores indicate better recommendations</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- drop out tab punya cecil -->
+
+            <div class="tab-pane fade" id="dropout" role="tabpanel" aria-labelledby="dropout-tab">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h3>Check Dropout Risk</h3>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="dropout">
+                                <div class="mb-3">
+                                    <label for="{{ forms.risk_dropout_form.student.id_for_label }}" class="form-label">Student</label>
+                                    {{ forms.risk_dropout_form.student }}
+                                </div>
+                                <button type="submit" class="btn btn-danger">Check Risk</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    {% if prediction_results.dropout %}
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h3>Dropout Risk Result</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <h4>Cluster Assigned: {{ prediction_results.dropout.cluster }}</h4>
+                                    <p>Student ID: {{ prediction_results.dropout.stu_id }}</p>
+                                    <p><strong>Interpretation:</strong>
+                                        {% if prediction_results.dropout.cluster == 0 %}
+                                            Low Risk
+                                        {% elif prediction_results.dropout.cluster == 1 %}
+                                            Medium Risk
+                                        {% elif prediction_results.dropout.cluster == 2 %}
+                                            High Risk
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if cluster_plot %}
+
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+
+            <!-- Grade Prediction Tab -->
+           <div class="col-md-6">
+    {% if prediction_results.grade %}
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h3>Prediction Result</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-success">
+                <h4>Predicted Grade: {{ prediction_results.grade.predicted_grade }}</h4>
+                <p>Confidence: {{ prediction_results.grade.confidence }}%</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Cluster Plot Visualization -->
+    {% if cluster_plot_base64 %}
+    <div class="card mt-3">
+        <div class="card-header bg-info text-white">
+            <h3>Clustering Visualization</h3>
+        </div>
+        <div class="card-body text-center">
+            <img src="data:image/png;base64,{{ cluster_plot_base64 }}" alt="Cluster Plot" class="img-fluid">
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'academic_analytics/js/script.js' %}"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Tambahkan class Bootstrap ke form input
+        document.querySelectorAll('select').forEach(function(select) {
+            select.classList.add('form-select');
+        });
+        document.querySelectorAll('input[type="number"]').forEach(function(input) {
+            input.classList.add('form-control');
+        });
+
+        // Aktifkan tab yang sesuai hasil prediksi
+        {% if prediction_results.recommendation %}
+            document.getElementById('prediction_tab').click();
+        {% endif %}
+        {% if prediction_results.course_recommendation %}
+            document.getElementById('recommendation-tab').click();
+        {% endif %}
+        {% if prediction_results.instructor %}
+            document.getElementById('instructor-tab').click();
+        {% endif %}
+        {% if prediction_results.grade %}
+            document.getElementById('grade-tab').click();
+        {% endif %}
+        {% if prediction_results.dropout %}
+            document.getElementById('dropout-tab').click();
+        {% endif %}
+
+    });
+    </script>
+
+
+</body>
+</html>
